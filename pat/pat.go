@@ -52,7 +52,6 @@ func main() {
 	router.Get("/parameters/path/:user", http.HandlerFunc(pathParameters))
 	router.Get("/parameters/query", http.HandlerFunc(queryParameters))
 	router.Put("/handling/request", http.HandlerFunc(handlingRequest))
-
 	log.Fatal(http.ListenAndServeTLS(":12345", "config/server-cert.pem",
 		"config/server-key.pem", router))
 }

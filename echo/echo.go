@@ -22,13 +22,17 @@ type Response struct {
 
 func pathParameters(c echo.Context) error {
 	user := c.Param("user")
-	return c.String(http.StatusOK, "user="+user)
+	paramNames := c.ParamNames()   // 路径参数名列表
+	paramValues := c.ParamValues() // 路径参数值列表
+	return c.String(http.StatusOK, fmt.Sprintf("user=%v, paramNames=%v, paramValues=%v",
+		user, paramNames, paramValues))
 }
 
 func queryParameters(c echo.Context) error {
-	user := c.QueryParam("user") // 支持Query参数
-	parameters := c.QueryParams()
-	return c.String(http.StatusOK, fmt.Sprintf("user=%v, params=%v", user, parameters))
+	path := c.Path()              // 获取handler的注册路径
+	user := c.QueryParam("user")  // 获取Query参数的第一个值
+	parameters := c.QueryParams() //获取所有Query参数map
+	return c.String(http.StatusOK, fmt.Sprintf("path=%v, user=%v, params=%v", path, user, parameters))
 }
 
 func handlingRequest(c echo.Context) error {
@@ -42,23 +46,23 @@ func handlingRequest(c echo.Context) error {
 
 // 认证
 func auth(username, password string) bool {
-	if username == "joe" && password == "secret" {
+	if username == "user" && password == "password" {
 		return true
 	}
 	return false
 }
 
 func main() {
-	e := echo.New()
-	e.Use(middleware.BasicAuth(auth))
-	e.Use(middleware.BodyLimit("80B"))
-	e.Use(middleware.Logger())
+	router := echo.New()
+	router.Use(middleware.BasicAuth(auth))
+	router.Use(middleware.BodyLimit("80B"))
+	router.Use(middleware.Logger())
 
-	e.GET("/parameters/path/:user", pathParameters)
-	e.GET("/parameters/query", queryParameters)
-	e.PUT("/handling/request", handlingRequest)
+	router.GET("/parameters/path/:user", pathParameters)
+	router.GET("/parameters/query", queryParameters)
+	router.PUT("/handling/request", handlingRequest)
 
-	e.Run(standard.WithConfig(engine.Config{
+	router.Run(standard.WithConfig(engine.Config{
 		Address:     ":12345",
 		TLSCertFile: "config/server-cert.pem",
 		TLSKeyFile:  "config/server-key.pem",
