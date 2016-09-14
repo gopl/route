@@ -37,6 +37,7 @@ func handlingRequest(ctx *iris.Context) {
 	}
 	fmt.Println(u)
 	ctx.JSON(iris.StatusOK, Response{"OK", "Handle Request"})
+
 }
 
 func main() {
